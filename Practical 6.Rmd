@@ -1,0 +1,97 @@
+---
+title: "Practical-6"
+author: "Rijul"
+date: "14-02-26"
+output: pdf_document
+---
+
+# Question
+
+Consider the “AirPassengers” data from R library and write the R program for the following:
+
+(a) Convert the data into a time series object.  
+(b) Plot the data to identify the dominant component.  
+(c) Decompose the data to observe the dominating components more clearly.  
+(d) Check stationarity or non-stationarity using ACF/PACF plot.  
+(e) Check stationarity or non-stationarity using the Augmented Dickey-Fuller (ADF) test.
+
+---
+
+# Objective
+
+To analyze the AirPassengers dataset by converting it into a time series object, identifying its dominant components, decomposing it into trend/seasonal/residual components, and checking stationarity using graphical and statistical methods.
+
+---
+
+# Code
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# =========================================
+# (a) Convert Data into Time Series Object
+# =========================================
+
+data("AirPassengers")
+
+ap_ts <- ts(AirPassengers, start = c(1949,1), frequency = 12)
+
+ap_ts
+
+
+# =========================================
+# (b) Plot to Identify Dominant Component
+# =========================================
+
+plot(ap_ts,
+     main="AirPassengers Time Series",
+     xlab="Year",
+     ylab="Number of Passengers",
+     col="blue",
+     lwd=2)
+
+# The plot shows an increasing trend and strong seasonality.
+
+
+# =========================================
+# (c) Decomposition
+# =========================================
+
+ap_dec <- decompose(ap_ts)
+
+plot(ap_dec)
+
+
+# =========================================
+# (d) Check Stationarity using ACF & PACF
+# =========================================
+
+acf(ap_ts, main="ACF Plot")
+pacf(ap_ts, main="PACF Plot")
+
+# Slow decay in ACF indicates non-stationarity.
+
+
+# =========================================
+# (e) Augmented Dickey-Fuller (ADF) Test
+# =========================================
+
+if (!require(tseries)) {
+  install.packages("tseries", repos="https://cloud.r-project.org")
+  library(tseries)
+}
+
+adf.test(ap_ts)
+
+# p-value < 0.05 → Stationary
+# p-value > 0.05 → Non-stationary
+```
+
+---
+
+# Conclusion
+
+The AirPassengers dataset is a monthly time series (frequency = 12).  
+The plot sho

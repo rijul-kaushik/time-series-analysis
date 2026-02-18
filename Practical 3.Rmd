@@ -1,0 +1,84 @@
+---
+title: "Practical-3"
+author: "Rijul"
+date: "14-02-26"
+output: pdf_document
+---
+
+# Question
+
+Consider the following datasets from the R library and write R code to decompose the time-series data into its trend, seasonal, and residual components. Furthermore, identify the dominating component(s) in the dataset:
+
+(a) Nottem data  
+(b) AirPassengers data  
+
+---
+
+# Objective
+
+To decompose the Nottem and AirPassengers datasets into their trend, seasonal, and residual components and determine the dominant component in each dataset.
+
+---
+
+# Code
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# =====================================
+# (a) Nottem Dataset
+# =====================================
+
+# Load dataset
+data("nottem")
+
+# Convert to time series (already ts object)
+nottem_ts <- ts(nottem, frequency = 12)
+
+# Plot original series
+plot(nottem_ts,
+     main="Nottem Time Series",
+     xlab="Year",
+     ylab="Temperature (°F)")
+
+# Decompose
+nottem_dec <- decompose(nottem_ts)
+
+# Plot decomposition
+plot(nottem_dec)
+
+
+# =====================================
+# (b) AirPassengers Dataset
+# =====================================
+
+# Load dataset
+data("AirPassengers")
+
+# Convert to time series (already ts object)
+ap_ts <- ts(AirPassengers, frequency = 12)
+
+# Plot original series
+plot(ap_ts,
+     main="AirPassengers Time Series",
+     xlab="Year",
+     ylab="Passengers")
+
+# Decompose
+ap_dec <- decompose(ap_ts)
+
+# Plot decomposition
+plot(ap_dec)
+```
+
+---
+
+# Conclusion
+
+**Nottem Dataset:**  
+The decomposition shows a strong seasonal component with no significant long-term trend. Therefore, the **Seasonal component is dominant**.
+
+**AirPassengers Dataset:**  
+The decomposition shows both a strong upward trend and strong seasonal variation. However, the increasing trend over time is very prominent. Therefore, the **Trend component is dominant**, along with noticeable seasonality.

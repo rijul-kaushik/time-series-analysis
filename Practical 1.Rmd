@@ -1,0 +1,83 @@
+---
+title: "Practical 1"
+author: "Rijul"
+date: "14/02/26"
+output: pdf_document
+---
+
+
+# Question
+
+For a given dataset of the US Population (in millions), perform the following tasks in R:
+
+(a) Enter the data into an Excel file.  
+(b) Import the data from the Excel file into the R working directory.  
+(c) Call the suitable package from the R library for time series analysis.  
+(d) Convert the dataset into a time series object and explain the nature of the data in terms of its sampling frequency.  
+(e) Plot the data and identify the dominating component(s).
+
+Data:  
+3929214, 5308483, 7239881, 9638453, 12860702, 17063353, 23191876, 31443321,  
+38558371, 50189209, 62979666, 76212168, 92228496, 106021537, 123202624,  
+132164569, 151325798, 179323175, 203302031, 226542203, 248709873
+
+---
+
+# Objective
+
+To import US population data from Excel, convert it into a time series object, analyze its sampling frequency, and identify the dominant component using graphical representation.
+
+---
+
+# Code
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# (a) Data entered manually into Excel file named "US_Population.xlsx"
+
+# (b) Import Excel data
+if (!require(readxl)) {
+  install.packages("readxl", repos="https://cloud.r-project.org")
+  library(readxl)
+}
+
+us_data <- read_excel("US_Population.xlsx")
+
+us_data
+
+# (c) Load suitable package for time series
+library(stats)
+
+# (d) Convert to Time Series Object
+population <- us_data[[1]]
+
+# Scale to millions for readability
+population_millions <- population / 1e6
+
+us_ts <- ts(population_millions, start = 1970, frequency = 1)
+
+us_ts
+
+# Display frequency
+frequency(us_ts)
+
+# (e) Plot the data
+plot(us_ts,
+     main = "US Population Growth",
+     xlab = "Year",
+     ylab = "Population (Millions)",
+     col = "blue",
+     lwd = 2)
+```
+
+---
+
+# Conclusion
+
+The US population data represents annual observations (frequency = 1).  
+The time series plot shows a strong upward trend over time.  
+
+Therefore, the **Trend component is the dominant component** in the dataset.

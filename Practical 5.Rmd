@@ -1,0 +1,107 @@
+---
+title: "Practical-5"
+author: "Rijul"
+date: "14-02-26"
+output: pdf_document
+---
+
+# Question
+
+Suppose we have a dataset containing the monthly volume of commercial bank real estate loans (in billions of dollars) stored in a text file. Write the R program for the following:
+
+(a) Import data into the R environment.  
+(b) Convert the data into a time series object.  
+(c) Plot the data to identify the dominant component.  
+(d) Check stationarity or non-stationarity using ACF/PACF plot.  
+(e) Check stationarity or non-stationarity using the Augmented Dickey-Fuller (ADF) test.
+
+---
+
+# Objective
+
+To import monthly commercial bank real estate loan data from a text file, convert it into a time series object, identify the dominant component, and test for stationarity using graphical and statistical methods.
+
+---
+
+# Code
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# ============================================
+# (a) Import Data into R Environment
+# ============================================
+loans_data <- read.table("bank_case.txt", header = TRUE)
+
+loans_data
+
+
+# ============================================
+# (b) Convert Data into Time Series Object
+# ============================================
+
+# Assuming the loan values are in first column
+loan_values <- loans_data[[1]]
+
+# Monthly data → frequency = 12
+loan_ts <- ts(loan_values, start = c(2000,1), frequency = 12)
+
+loan_ts
+
+
+# ============================================
+# (c) Plot to Identify Dominant Component
+# ============================================
+
+plot(loan_ts,
+     main = "Monthly Commercial Real Estate Loans",
+     xlab = "Year",
+     ylab = "Loans (Billions of Dollars)",
+     col = "blue",
+     lwd = 2)
+
+# Observation:
+# If steadily increasing → Trend dominant
+# If repeating yearly pattern → Seasonal dominant
+
+
+# ============================================
+# (d) Check Stationarity using ACF & PACF
+# ============================================
+
+acf(loan_ts, main = "ACF Plot")
+pacf(loan_ts, main = "PACF Plot")
+
+# Slow decay in ACF → Non-stationary
+# Sharp cutoff → Stationary
+
+
+# ============================================
+# (e) Augmented Dickey-Fuller (ADF) Test
+# ============================================
+
+if (!require(tseries)) {
+  install.packages("tseries", repos="https://cloud.r-project.org")
+  library(tseries)
+}
+
+adf.test(loan_ts)
+
+# p-value < 0.05 → Stationary
+# p-value > 0.05 → Non-stationary
+```
+
+---
+
+# Conclusion
+
+The monthly loan data is converted into a time series with frequency = 12.  
+From the time series plot, the dominant component can be identified (typically trend in financial data).
+
+ACF/PACF plots help visually assess stationarity.  
+The ADF test provides statistical confirmation:
+
+- If p-value < 0.05 → The series is stationary.  
+- If p-value > 0.05 → The series is non-stationary.

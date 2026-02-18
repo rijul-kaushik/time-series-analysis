@@ -1,0 +1,71 @@
+---
+title: "Practical-2"
+author: "Rijul"
+date: "14-02-26"
+output: pdf_document
+---
+
+# Question
+
+The “Nottem” dataset is available in the R library and contains historical time series observations. Using this dataset, perform the following tasks:
+
+(a) Write the R command to load the library in which the “Nottem” dataset is available.  
+(b) Write the R command to load the “Nottem” dataset into the R working environment.  
+(c) Write the appropriate R command to view the description of the dataset and briefly explain the key characteristics of the data.  
+(d) Explain the nature of the data in terms of its sampling frequency.  
+(e) Plot the time series data and write your observations about the pattern of the data.
+
+---
+
+# Objective
+
+To load and analyze the Nottem dataset in R, understand its structure and sampling frequency, and identify the main pattern of the time series through visualization.
+
+---
+
+# Code
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# (a) Load the library
+library(datasets)
+
+# (b) Load the Nottem dataset
+data("nottem")
+
+# View dataset
+nottem
+
+# (c) View description
+?nottem
+
+# Display key characteristics
+start(nottem)
+end(nottem)
+frequency(nottem)
+class(nottem)
+
+# (d) Sampling frequency explanation
+# Frequency = 12 → Monthly data (12 observations per year)
+
+# (e) Plot the time series
+plot(nottem,
+     main = "Average Monthly Air Temperatures (Nottingham)",
+     xlab = "Year",
+     ylab = "Temperature (°F)",
+     col = "blue",
+     lwd = 2)
+```
+
+---
+
+# Conclusion
+
+The Nottem dataset is a monthly time series (frequency = 12) representing average air temperatures in Nottingham from 1920 to 1939.
+
+The plot shows a strong seasonal pattern that repeats every 12 months. There is no significant long-term trend, and the variance appears fairly constant.
+
+Therefore, the dominant component in the dataset is the **Seasonal component**.
