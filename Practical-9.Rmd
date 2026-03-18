@@ -1,0 +1,124 @@
+---
+title: "Practical-9"
+date: "28-02-26"
+output: pdf_document
+---
+
+# Question
+
+Download the monthly Commercial Bank Real Estate Loan data (in billions of dollars) and:
+
+1. Convert it into a time series object.  
+2. Check stationarity.  
+3. Identify and estimate a suitable ARIMA model.  
+4. Perform diagnostic checking.  
+5. Forecast the next 20 months.
+
+---
+
+# Objective
+
+To analyze the Commercial Bank Real Estate Loan data using ARIMA methodology, identify the appropriate model through AIC criteria, validate it using diagnostic tests, and forecast future values.
+---
+
+# Code
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+rm(list=ls(all=TRUE))
+
+library(tseries)
+library(forecast)
+library(readr)
+library(lmtest)
+library(FinTS)
+
+# Step 1: Data Import
+bank_case <- read_csv("C:/Users/maths/Desktop/230957070 Rijul/TSA/5/bank_case.txt",
+                      col_names = FALSE)
+bank_case <- bank_case$X1
+
+bank_ts <- ts(bank_case, frequency = 12)
+bank_ts
+
+# Step 2: Plot
+plot(bank_ts,
+     main="Commercial Bank Real Estate Loan Data",
+     xlab="Time",
+     ylab="Loans (Billions)",
+     col="blue",
+     lwd=2)
+
+# Step 3: Stationarity Check
+acf(bank_ts)
+pacf(bank_ts)
+adf.test(bank_ts)
+
+# Step 4: Differencing
+bank_d1 <- diff(bank_ts)
+adf.test(bank_d1)
+
+bank_d2 <- diff(bank_d1)
+adf.test(bank_d2)
+
+acf(bank_d2)
+pacf(bank_d2)
+
+# Step 5: Model Identification
+fit1 <- arima(bank_ts, order=c(0,2,0))
+fit2 <- arima(bank_ts, order=c(1,2,1))
+fit3 <- arima(bank_ts, order=c(0,2,1))
+fit4 <- arima(bank_ts, order=c(1,2,0))
+
+AIC(fit1); AIC(fit2); AIC(fit3); AIC(fit4)
+
+# Step 6: Model Estimation
+bank_model <- arima(bank_ts, order=c(0,2,1), method="ML")
+summary(bank_model)
+
+# Step 7: Diagnostic Checking
+res <- residuals(bank_model)
+
+plot(res, type="l")
+abline(h=0)
+
+shapiro.test(res)
+qqnorm(res); qqline(res, col="red")
+
+Box.test(res, lag=10, type="Ljung-Box")
+acf(res); pacf(res)
+
+ArchTest(res)
+
+acf(res^2)
+pacf(res^2)
+
+# Step 8: Forecasting
+bank_forecast <- forecast(bank_model, h=20)
+bank_forecast
+
+plot(bank_forecast,
+     main="20-Month Forecast",
+     xlab="Time",
+     ylab="Loans (Billions)")
+```
+
+---
+
+# Conclusion
+
+The time series plot of the Commercial Bank Real Estate Loan data indicates a clear upward trend, suggesting that the series is non-stationary. The ACF plot of the original series shows slow decay, further confirming non-stationarity. After applying second differencing, the Augmented Dickey-Fuller test confirms stationarity.
+
+Based on AIC comparison among competing models, ARIMA(0,2,1) was selected as the most appropriate model. The mathematical form of the model is:
+
+$(1 - B)^2 Y_t = (1 + \theta_1 B)\varepsilon_t$
+
+Diagnostic checks were performed on the residuals. The Shapiro-Wilk test examined normality, the Ljung-Box test confirmed absence of autocorrelation (p-value > 0.05), and the ARCH test along with ACF/PACF of squared residuals indicated no significant heteroscedasticity. Hence, the residuals behave like white noise.
+
+Therefore, ARIMA(0,2,1) is an adequate model for the given data, and it was successfully used to forecast the next 20 months of Commercial Bank Real Estate Loans.
+
+The 20-month forecast suggests that the upward trend in Commercial Bank Real Estate Loans is expected to continue, with projections showing sustained growth despite increasing forecast uncertainty over time.

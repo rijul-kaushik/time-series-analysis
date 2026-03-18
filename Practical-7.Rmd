@@ -1,0 +1,114 @@
+---
+title: "Practical-7"
+author: "Rijul"
+date: "2026-03-03"
+output: pdf_document
+---
+
+# Question
+
+Consider the monthly volume of Commercial Bank Real Estate Loans (in billions of dollars) data set stored in a text file and:
+
+1. Import the data into the R environment.  
+2. Convert the data into a time series object.  
+3. Plot the data to identify the dominant component.  
+4. Check stationarity using ACF/PACF plots.  
+5. Check stationarity using the Augmented Dickey-Fuller (ADF) test.  
+6. If non-stationary, make it stationary using an appropriate operator.  
+7. Select a suitable ARIMA model using ACF/PACF and AIC criteria.  
+8. Fit the selected model and estimate parameters.  
+9. Check the goodness of fit of the model.
+
+---
+
+# Objective
+
+To analyze the monthly Commercial Bank Real Estate Loan data using ARIMA methodology by testing stationarity, identifying an appropriate model using ACF/PACF and AIC criteria, estimating model parameters, and validating the model using diagnostic tests.
+
+---
+
+# Code
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+rm(list=ls(all=TRUE))
+
+library(tseries)
+library(forecast)
+library(readr)
+
+# Step 1: Data Import
+loan_data <- read_csv("C:/Users/maths/Desktop/230957070 Rijul/TSA/4/bank_case.txt",
+                      col_names = FALSE)
+loan_data <- loan_data$X1
+
+# Step 2: Convert to Time Series
+loan_ts <- ts(loan_data, start=c(2000,1), frequency=12)
+loan_ts
+
+# Step 3: Plot Time Series
+plot(loan_ts,
+     main="Commercial Bank Real Estate Loan Data",
+     xlab="Time",
+     ylab="Loans (Billions)",
+     col="blue",
+     lwd=2)
+
+# Step 4: ACF and PACF
+par(mfrow=c(1,2))
+acf(loan_ts, main="ACF of Original Series")
+pacf(loan_ts, main="PACF of Original Series")
+
+# Step 5: ADF Test
+adf.test(loan_ts)
+
+# Step 6: Differencing if Non-Stationary
+loan_d1 <- diff(loan_ts)
+adf.test(loan_d1)
+
+loan_d2 <- diff(loan_d1)
+adf.test(loan_d2)
+
+par(mfrow=c(1,2))
+acf(loan_d2, main="ACF of Differenced Series")
+pacf(loan_d2, main="PACF of Differenced Series")
+
+# Step 7: Model Identification using AIC
+fit1 <- arima(loan_ts, order=c(0,2,0))
+fit2 <- arima(loan_ts, order=c(1,2,0))
+fit3 <- arima(loan_ts, order=c(0,2,1))
+fit4 <- arima(loan_ts, order=c(1,2,1))
+
+AIC(fit1); AIC(fit2); AIC(fit3); AIC(fit4)
+
+# Step 8: Model Estimation
+final_model <- arima(loan_ts, order=c(0,2,1), method="ML")
+summary(final_model)
+
+# Step 9: Diagnostic Checking
+res <- residuals(final_model)
+
+plot(res, type="l", main="Residuals")
+abline(h=0)
+
+acf(res); pacf(res)
+
+Box.test(res, lag=10, type="Ljung-Box")
+checkresiduals(final_model)
+```
+
+---
+
+# Conclusion
+
+The time series plot indicates a strong upward trend in the Commercial Bank Real Estate Loan data, suggesting non-stationarity. The ACF plot shows slow decay, confirming the presence of a trend component. The Augmented Dickey-Fuller test also supports non-stationarity in the original series.
+
+After applying second differencing, the ADF test confirms stationarity. Based on AIC comparison among competing ARIMA models, ARIMA(0,2,1) is selected as the most suitable model.
+
+Diagnostic tests including the Ljung-Box test and residual ACF indicate that the residuals behave like white noise, confirming adequacy of the fitted model.
+
+Hence, ARIMA(0,2,1) is an appropriate model for the given data.

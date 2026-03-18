@@ -1,0 +1,134 @@
+---
+title: "Practical-8"
+author: "Rijul"
+date: "2026-03-03"
+output: pdf_document
+---
+
+# Question
+
+Consider the “AirPassengers” dataset available in R and:
+
+1. Convert the data into a time series object.  
+2. Plot the data to identify the dominant component.  
+3. Decompose the data to observe the dominant components.  
+4. Check stationarity using ACF/PACF plots.  
+5. Check stationarity using the KPSS test.  
+6. If non-stationary, make it stationary using an appropriate operator.  
+7. Select a suitable technique to fit the data.  
+8. Fit the selected model and estimate parameters.  
+9. Check the goodness of fit of the model.  
+
+---
+
+# Objective
+
+To analyze the AirPassengers dataset using time series techniques by identifying trend and seasonality, testing stationarity using KPSS, transforming the data appropriately, fitting a suitable SARIMA model, and validating it using diagnostic checks.
+
+---
+
+# Code
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+rm(list=ls(all=TRUE))
+
+# (f) Load and Convert to Time Series
+data(AirPassengers)
+ap_ts <- AirPassengers
+
+print(class(ap_ts))
+print(start(ap_ts))
+print(end(ap_ts))
+print(frequency(ap_ts))
+
+# (g) Plot the Data
+plot(ap_ts,
+     main="Monthly Airline Passengers (1949–1960)",
+     xlab="Year",
+     ylab="Passengers",
+     col="blue",
+     lwd=2)
+
+# (h) Decompose the Data (Multiplicative Model)
+decomp_ap <- decompose(ap_ts, type="multiplicative")
+plot(decomp_ap)
+
+# (i) ACF and PACF of Original Series
+par(mfrow=c(1,2))
+acf(ap_ts, main="ACF of Original Series")
+pacf(ap_ts, main="PACF of Original Series")
+par(mfrow=c(1,1))
+
+# (j) KPSS Test
+library(tseries)
+kpss.test(ap_ts)
+
+# (k) Make Data Stationary
+
+# Log Transformation (Variance Stabilization)
+log_ap <- log(ap_ts)
+
+# Seasonal Differencing
+diff_seasonal <- diff(log_ap, lag=12)
+
+# First Differencing
+ap_stationary <- diff(diff_seasonal)
+
+plot(ap_stationary,
+     main="Stationary Series after Log + Seasonal + First Differencing",
+     col="red")
+
+par(mfrow=c(1,2))
+acf(ap_stationary, main="ACF of Stationary Series")
+pacf(ap_stationary, main="PACF of Stationary Series")
+par(mfrow=c(1,1))
+
+kpss.test(ap_stationary)
+
+# (l) Select Suitable Technique → SARIMA
+
+library(forecast)
+
+# (m) Fit Model using auto.arima
+model_ap <- auto.arima(ap_ts)
+summary(model_ap)
+
+# (n) Goodness of Fit
+
+res <- residuals(model_ap)
+
+# Residual Plot
+plot(res, type="l", main="Residuals of Fitted Model")
+abline(h=0)
+
+# ACF of Residuals
+acf(res, main="ACF of Residuals")
+
+# Ljung-Box Test
+Box.test(res, lag=12, type="Ljung-Box")
+
+checkresiduals(model_ap)
+
+# Forecast Next 12 Months
+forecast_ap <- forecast(model_ap, h=12)
+forecast_ap
+
+plot(forecast_ap,
+     main="12-Month Forecast",
+     xlab="Year",
+     ylab="Passengers")
+```
+
+#Conclusion
+The AirPassengers data shows a clear upward trend and strong seasonality with increasing variance, indicating a multiplicative structure. The ACF plot confirms non-stationarity, and the KPSS test statistically supports this conclusion.
+
+After applying log transformation, seasonal differencing, and first differencing, the series becomes stationary. Since the data exhibits both trend and seasonality, a Seasonal ARIMA (SARIMA) model is appropriate.
+
+Using AIC-based selection via auto.arima(), an optimal SARIMA model is fitted. Diagnostic tests including the Ljung-Box test and residual ACF confirm that the residuals behave like white noise, indicating a good model fit.
+
+Thus, the fitted SARIMA model adequately explains the AirPassengers data and can be used for forecasting future passenger values.

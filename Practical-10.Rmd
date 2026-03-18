@@ -1,0 +1,87 @@
+---
+title: "Practical-10"
+author: "Rijul"
+date: "28-02-26"
+output: pdf_document
+---
+
+# Question
+
+Consider the AirPassengers dataset in R and:
+
+1. Convert it into a time series object.  
+2. Decompose the series to identify trend and seasonality.  
+3. Check stationarity.  
+4. Apply suitable transformation if required.  
+5. Fit an appropriate Holt-Winters model.  
+6. Forecast the next 12 months.
+
+---
+
+# Objective
+
+To analyze the AirPassengers data using decomposition and exponential smoothing techniques, select the appropriate Holt-Winters model, and forecast future passenger values.
+
+---
+
+# Code
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+rm(list=ls(all=TRUE))
+
+library(tseries)
+library(forecast)
+
+# Step 1: Data
+data("AirPassengers")
+ap_ts <- ts(AirPassengers, start=c(1949,1), frequency=12)
+
+plot(ap_ts,
+     main="Monthly Airline Passenger Data",
+     ylab="Passengers",
+     col="blue",
+     lwd=2)
+
+# Step 2: Decomposition
+ap_dec <- decompose(ap_ts, type="multiplicative")
+plot(ap_dec)
+
+# Step 3: Stationarity Check
+acf(ap_ts)
+pacf(ap_ts)
+kpss.test(ap_ts)
+
+# Step 4: Log Transformation
+ap_log <- log(ap_ts)
+plot(ap_log)
+
+# Step 5: Holt-Winters Models
+hw_double <- HoltWinters(ap_log, gamma=FALSE)
+hw_double$SSE
+
+hw_triple <- HoltWinters(ap_log)
+hw_triple$SSE
+plot(hw_triple)
+
+# Step 6: Forecasting
+ap_forecast <- forecast(hw_triple, h=12)
+ap_forecast
+
+plot(ap_forecast,
+     main="12-Month Forecast")
+
+forecast_original <- exp(ap_forecast$mean)
+forecast_original
+```
+
+# Conclusion
+
+The AirPassengers time series shows a clear upward trend and strong seasonality. The decomposition confirms multiplicative seasonal behavior with increasing variance over time. The KPSS test indicates that the original series is non-stationary.
+
+After applying log transformation to stabilize the variance, Holt-Winters exponential smoothing models were fitted. Based on comparison of SSE values, the Triple Exponential Smoothing (multiplicative Holt-Winters) model was found to be more appropriate.
+
+The selected model effectively captures both the trend and seasonal components and was used to forecast passenger values for the next 12 months. The forecast suggests that the upward growth pattern will continue over the next year, with regular seasonal fluctuations similar to the historical pattern, indicating sustained expansion in air passenger traffic.
