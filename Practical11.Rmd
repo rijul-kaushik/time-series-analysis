@@ -1,0 +1,53 @@
+---
+title: "Practical 11"
+author: "Rijul"
+date: "2026-03-28"
+output: pdf_document
+---
+
+```{r}
+# Load dataset
+data("nottem")
+
+# Convert to time series object
+ts_data <- nottem
+
+```
+
+
+```{r}
+# Plot the series
+plot(ts_data, main="Monthly Average Air Temperatures at Nottingham",
+     ylab="Temperature (F)", xlab="Year")
+#Load forecasting libraries
+library(forecast)
+library(tseries)
+```
+
+
+
+```{r}
+#check for stationarity
+adf.test(ts_data)
+
+#apply seasonal differencing
+ts_diff <- diff(ts_data, lag=12)
+plot(ts_diff)
+```
+
+```{r}
+#Fit an ARIMA/SARIMA model
+model <- auto.arima(ts_data, seasonal=TRUE)
+summary(model)
+```
+```{r}
+#forecast the values
+forecast_values <- forecast(model, h=24)
+
+print(forecast_values)
+plot(forecast_values)
+```
+```{r}
+#extract the forecasted values
+forecast_values$mean
+```
